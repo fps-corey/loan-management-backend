@@ -1,0 +1,140 @@
+# Backend TODO — Loan Management System (Spring Boot)
+
+This backend will power an Angular loan management app used by loan officers to manage members, loans, documents, and payment reconciliation.
+
+---
+
+## 📦 Core Entities & Requirements
+
+### 1. Member
+- Fields:
+  - Full name, email, phone numbers, address
+  - Marital status (enum), education level (enum), residential status (enum)
+  - Number of dependents
+  - Employment details
+  - Bank information
+  - Next of kin details
+  - Spouse details
+  - Preferred language
+  - Membership channel
+  - Referral source
+- Requirements:
+  - CRUD operations
+  - Search and filter members by name, status, etc.
+
+---
+
+### 2. Loan
+- Fields:
+  - Member (relation)
+  - Amount, interest, status, term
+  - Disbursement date, due date(s)
+  - Payment history
+- Requirements:
+  - CRUD operations
+  - List loans by member
+  - Support payment matching based on bank statement upload
+
+---
+
+### 3. Document
+- Fields:
+  - File (PDF/CSV), type (ID, agreement, bank statement, etc.)
+  - Related to Member, optional Loan
+  - Upload date, uploadedBy, version (int)
+- Requirements:
+  - Upload documents
+  - Download documents
+  - Filter by member, loan, type
+  - Version tracking (e.g., re-uploads create new versions)
+
+---
+
+### 4. Bank Statement Reconciliation
+- Upload a PDF or CSV containing bank transactions
+- Backend parses transactions
+- Matches them to loans based on reference and amount
+- Returns matched suggestions:
+  ```json
+  [
+    {
+      "loanId": "uuid",
+      "amount": 123.45,
+      "reference": "TXN1234"
+    }
+  ]
+  ```
+- Frontend confirms matches and submits final selection
+- Backend applies the confirmed payments to the loans
+
+---
+
+### 5. Document Signing
+- Angular frontend allows member to draw or type signature
+- Member places it on a rendered PDF using a drag-and-drop canvas
+- Backend receives:
+  - Signed PDF
+  - Metadata: signedBy, memberId, timestamp
+- Store signed PDF under documents with type = "SIGNED_AGREEMENT"
+- Optionally embed metadata into PDF
+
+---
+
+## ⚙️ Technical Stack
+
+- Java 21
+- Spring Boot 3.2.x
+- Spring Web, Spring Data JPA
+- PostgreSQL
+- Spring Security + Spring Authorization Server (stateless API)
+- File storage: local filesystem (with support to switch to S3 later)
+- Token-based auth (OAuth2 PKCE or ROPC from Angular)
+- Multipart support for file upload
+
+---
+
+## 🔐 Security
+
+- No HTML login or UI — API only
+- Bearer token required for all endpoints
+- Support both:
+  - Authorization Code + PKCE (Angular frontend)
+  - Resource Owner Password Credentials (used programmatically)
+
+---
+
+## Suggested API Endpoints
+
+```
+POST   /api/members
+GET    /api/members
+GET    /api/members/{id}
+PUT    /api/members/{id}
+DELETE /api/members/{id}
+
+GET    /api/members/{id}/loans
+POST   /api/loans
+GET    /api/loans/{id}
+PUT    /api/loans/{id}
+DELETE /api/loans/{id}
+
+POST   /api/documents/upload
+GET    /api/documents
+GET    /api/documents/{id}/download
+
+POST   /api/bank-statements/match
+POST   /api/bank-statements/confirm-matches
+
+POST   /api/documents/signed
+```
+
+---
+
+## 📎 Notes
+
+- All endpoints must be stateless
+- Designed for integration with Angular UI at runtime
+- Cursor should generate proper JPA entities, service layers, and REST controllers
+- Use meaningful DTOs for input/output separation
+- Avoid exposing entities directly via controllers
+- Generate validation annotations on DTOs (e.g., `@NotBlank`, `@Email`)
