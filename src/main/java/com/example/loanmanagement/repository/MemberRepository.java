@@ -1,5 +1,6 @@
 package com.example.loanmanagement.repository;
 
+import com.example.loanmanagement.dto.member.MemberSummaryDto;
 import com.example.loanmanagement.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -7,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,6 +32,20 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
             @Param("status") Boolean status,
             Pageable pageable
     );
+
+    @Query("""
+    SELECT 
+      m.id AS id,
+      m.displayId AS displayId,
+      CONCAT(m.firstName, ' ', m.lastName) AS fullName,
+      m.email AS email,
+      m.phoneNumber AS phoneNumber,
+      SIZE(m.loans) AS loanCount,
+      m.active AS active
+    FROM Member m
+    """)
+    List<MemberSummaryDto> findAllSummaries();
+
     
     boolean existsByEmail(String email);
     

@@ -1,6 +1,10 @@
 package com.example.loanmanagement.controller;
 
+import com.example.loanmanagement.dto.loans.LoanSummaryView;
+import com.example.loanmanagement.dto.member.MemberDto;
+import com.example.loanmanagement.dto.member.MemberSummaryDto;
 import com.example.loanmanagement.entity.Member;
+import com.example.loanmanagement.service.MemberMapper;
 import com.example.loanmanagement.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -23,10 +28,15 @@ public class MemberController {
     public ResponseEntity<Member> createMember(@Valid @RequestBody Member member) {
         return new ResponseEntity<>(memberService.createMember(member), HttpStatus.CREATED);
     }
+
+    @GetMapping("/summary")
+    public ResponseEntity<List<MemberSummaryDto>> getLoanSummaries() {
+        return ResponseEntity.ok(memberService.getMemberSummary());
+    }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Member> getMember(@PathVariable UUID id) {
-        return ResponseEntity.ok(memberService.getMember(id));
+    public ResponseEntity<MemberDto> getMember(@PathVariable UUID id) {
+        return ResponseEntity.ok(MemberMapper.toDto(memberService.getMember(id)));
     }
     
     @GetMapping

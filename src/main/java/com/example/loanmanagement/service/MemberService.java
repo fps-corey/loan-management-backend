@@ -1,5 +1,6 @@
 package com.example.loanmanagement.service;
 
+import com.example.loanmanagement.dto.member.MemberSummaryDto;
 import com.example.loanmanagement.entity.Member;
 import com.example.loanmanagement.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -17,6 +19,7 @@ import java.util.UUID;
 public class MemberService {
     
     private final MemberRepository memberRepository;
+    private DisplayIdService displayIdService;
     
     @Transactional
     public Member createMember(Member member) {
@@ -26,6 +29,8 @@ public class MemberService {
         if (memberRepository.existsByPhoneNumber(member.getPhoneNumber())) {
             throw new IllegalArgumentException("Phone number already exists");
         }
+
+        member.setDisplayId(displayIdService.getNextDisplayId("member"));
         return memberRepository.save(member);
     }
     
@@ -67,7 +72,6 @@ public class MemberService {
         existingMember.setEmail(member.getEmail());
         existingMember.setPhoneNumber(member.getPhoneNumber());
         existingMember.setDateOfBirth(member.getDateOfBirth());
-        existingMember.setAddress(member.getAddress());
         existingMember.setMaritalStatus(member.getMaritalStatus());
         existingMember.setEducationLevel(member.getEducationLevel());
         existingMember.setResidentialStatus(member.getResidentialStatus());
@@ -104,4 +108,8 @@ public class MemberService {
         member.setActive(true);
         memberRepository.save(member);
     }
-} 
+
+    public List<MemberSummaryDto> getMemberSummary() {
+        return memberRepository.findAllSummaries();
+    }
+}
