@@ -1,10 +1,9 @@
 package com.example.loanmanagement.service;
 
-import com.example.loanmanagement.controller.MemberController;
 import com.example.loanmanagement.dto.member.MemberSummaryDto;
+import com.example.loanmanagement.dto.member.MemberUpdateDto;
 import com.example.loanmanagement.entity.Member;
 import com.example.loanmanagement.repository.MemberRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static com.example.loanmanagement.service.converter.MemberUpdateConverter.applyUpdate;
 
 @Service
 @RequiredArgsConstructor
@@ -65,52 +66,28 @@ public class MemberService {
     ) {
         return memberRepository.findBySearchCriteria(firstName, lastName, email, phoneNumber, status, pageable);
     }
-    
+
     @Transactional
-    public Member updateMember(UUID id, Member member) {
-        Member existingMember = getMember(id);
-        
-        // Check if email is being changed and if it's already taken
-        if (!existingMember.getEmail().equals(member.getEmail()) &&
-                memberRepository.existsByEmail(member.getEmail())) {
+    public Member updateMember(UUID id, MemberUpdateDto dto) {
+        Member existing = getMember(id);
+
+        // Fail early if email or phone taken
+        if (!existing.getEmail().equals(dto.getEmail()) &&
+                memberRepository.existsByEmail(dto.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
         }
-        
-        // Check if phone number is being changed and if it's already taken
-        if (!existingMember.getPhoneNumber().equals(member.getPhoneNumber()) &&
-                memberRepository.existsByPhoneNumber(member.getPhoneNumber())) {
+
+        if (!existing.getPhoneNumber().equals(dto.getPhoneNumber()) &&
+                memberRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
             throw new IllegalArgumentException("Phone number already exists");
         }
-        
-        // Update fields
-        existingMember.setFirstName(member.getFirstName());
-        existingMember.setLastName(member.getLastName());
-        existingMember.setEmail(member.getEmail());
-        existingMember.setPhoneNumber(member.getPhoneNumber());
-        existingMember.setDateOfBirth(member.getDateOfBirth());
-        existingMember.setMaritalStatus(member.getMaritalStatus());
-        existingMember.setEducationLevel(member.getEducationLevel());
-        existingMember.setResidentialStatus(member.getResidentialStatus());
-        existingMember.setNumberOfDependents(member.getNumberOfDependents());
-        existingMember.setOccupation(member.getOccupation());
-        existingMember.setEmployerName(member.getEmployerName());
-        existingMember.setMonthlyIncome(member.getMonthlyIncome());
-        existingMember.setBankName(member.getBankName());
-        existingMember.setBankAccountNumber(member.getBankAccountNumber());
-        existingMember.setBankSortCode(member.getBankSortCode());
-        existingMember.setNextOfKinName(member.getNextOfKinName());
-        existingMember.setNextOfKinPhone(member.getNextOfKinPhone());
-        existingMember.setNextOfKinRelationship(member.getNextOfKinRelationship());
-        existingMember.setSpouseName(member.getSpouseName());
-        existingMember.setSpouseOccupation(member.getSpouseOccupation());
-        existingMember.setSpouseMonthlyIncome(member.getSpouseMonthlyIncome());
-        existingMember.setPreferredLanguage(member.getPreferredLanguage());
-        existingMember.setMembershipChannel(member.getMembershipChannel());
-        existingMember.setReferralSource(member.getReferralSource());
-        
-        return memberRepository.save(existingMember);
+
+        applyUpdate(dto, existing);
+
+        return memberRepository.save(existing);
     }
-    
+
+
     @Transactional
     public void deleteMember(UUID id) {
         Member member = getMember(id);

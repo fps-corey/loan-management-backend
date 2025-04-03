@@ -3,6 +3,7 @@ package com.example.loanmanagement.controller;
 import com.example.loanmanagement.dto.loans.LoanSummaryView;
 import com.example.loanmanagement.dto.member.MemberDto;
 import com.example.loanmanagement.dto.member.MemberSummaryDto;
+import com.example.loanmanagement.dto.member.MemberUpdateDto;
 import com.example.loanmanagement.entity.Member;
 import com.example.loanmanagement.exception.GlobalExceptionHandler;
 import com.example.loanmanagement.service.MemberMapper;
@@ -64,13 +65,14 @@ public class MemberController {
     ) {
         return ResponseEntity.ok(memberService.searchMembers(firstName, lastName, email, phoneNumber, status, pageable));
     }
-    
+
     @PutMapping("/{id}")
-    public ResponseEntity<Member> updateMember(
+    public ResponseEntity<?> updateMember(
             @PathVariable UUID id,
-            @Valid @RequestBody Member member
+            @RequestBody MemberUpdateDto dto
     ) {
-        return ResponseEntity.ok(memberService.updateMember(id, member));
+        memberService.updateMember(id, dto);
+        return ResponseEntity.ok().build();
     }
     
     @DeleteMapping("/{id}")
