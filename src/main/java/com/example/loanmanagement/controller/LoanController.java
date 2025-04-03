@@ -30,7 +30,7 @@ public class LoanController {
     public ResponseEntity<Loan> getLoan(@PathVariable UUID id) {
         return ResponseEntity.ok(loanService.getLoan(id));
     }
-    
+
     @GetMapping("/member/{memberId}")
     public ResponseEntity<Page<Loan>> getMemberLoans(
             @PathVariable UUID memberId,

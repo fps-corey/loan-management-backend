@@ -3,6 +3,7 @@ package com.example.loanmanagement.service;
 import com.example.loanmanagement.entity.Loan;
 import com.example.loanmanagement.entity.Member;
 import com.example.loanmanagement.entity.enums.LoanStatus;
+import com.example.loanmanagement.exception.NotFoundException;
 import com.example.loanmanagement.repository.LoanRepository;
 import com.example.loanmanagement.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -44,7 +45,7 @@ public class LoanService {
     
     public Loan getLoan(UUID id) {
         return loanRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Loan not found with id: " + id));
+                .orElseThrow(() -> new NotFoundException("Loan not found with id: " + id));
     }
     
     public Page<Loan> getMemberLoans(UUID memberId, Pageable pageable) {

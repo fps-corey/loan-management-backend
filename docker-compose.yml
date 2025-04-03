@@ -11,7 +11,6 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./src/main/resources/db/init:/docker-entrypoint-initdb.d
     networks:
       - loan-network
     healthcheck:
@@ -30,11 +29,9 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/loanmanagement
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
       - SPRING_JPA_SHOW_SQL=true
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
-      # Override the auth-server URL to use localhost since it's running outside Docker
-      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_INTROSPECTION_URI=http://host.docker.internal:9000/oauth2/introspect
     volumes:
       - ./uploads:/app/uploads
     depends_on:
