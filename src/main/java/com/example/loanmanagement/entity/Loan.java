@@ -1,6 +1,8 @@
 package com.example.loanmanagement.entity;
 
 import com.example.loanmanagement.entity.enums.LoanStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +11,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
-
 @Entity
 @Table(name = "loans")
 @Getter
@@ -18,6 +19,7 @@ public class Loan extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
+    @JsonBackReference // Prevents back-serialization from Loan to Member
     private Member member;
 
     @Column(name = "display_id", unique = true, nullable = false)
@@ -78,11 +80,14 @@ public class Loan extends BaseEntity {
     private String additionalServices;
 
     @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // Prevent unnecessary nested objects
     private Set<Document> documents = new HashSet<>();
 
     @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Set<Payment> payments = new HashSet<>();
 
     @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Set<LoanApproval> approvals = new HashSet<>();
 }

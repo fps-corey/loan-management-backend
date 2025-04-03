@@ -1,22 +1,22 @@
 package com.example.loanmanagement.service;
 
-import com.example.loanmanagement.dto.member.MemberDto;
-import com.example.loanmanagement.dto.member.MemberDto.*;
-import com.example.loanmanagement.dto.member.MemberSummaryDto;
 import com.example.loanmanagement.entity.Loan;
 import com.example.loanmanagement.entity.Member;
+import com.example.loanmanagement.dto.member.*;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class MemberMapper {
 
     public static MemberDto toDto(Member member) {
-        List<LoanBriefDto> loanDtos = member.getLoans().stream()
+        List<MemberDto.LoanBriefDto> loanDtos = member.getLoans().stream()
                 .map(MemberMapper::toLoanBriefDto)
+                .sorted(Comparator.comparing(MemberDto.LoanBriefDto::getStartDate).reversed())
                 .collect(Collectors.toList());
 
-        AddressDto addressDto = new AddressDto(
+        MemberDto.AddressDto addressDto = new MemberDto.AddressDto(
                 member.getAddressStreet(),
                 member.getAddressCity(),
                 member.getAddressRegion(),
@@ -24,13 +24,13 @@ public class MemberMapper {
                 member.getAddressCountry()
         );
 
-        EmploymentDto employmentDto = new EmploymentDto(
+        MemberDto.EmploymentDto employmentDto = new MemberDto.EmploymentDto(
                 member.getEmployerName(),
                 member.getOccupation(),
                 member.getMonthlyIncome() != null ? String.format("%.2f", member.getMonthlyIncome()) : null
         );
 
-        AuditDto auditDto = new AuditDto(
+        MemberDto.AuditDto auditDto = new MemberDto.AuditDto(
                 member.getCreatedAt(),
                 member.getCreatedBy(),
                 member.getUpdatedAt(),
@@ -51,7 +51,7 @@ public class MemberMapper {
                 "STANDARD", // or infer memberType from other fields
                 member.isDocumentsVerified(),
                 member.getCreatedAt().toLocalDate(),
-                member.isActive() ? "ACTIVE" : "INACTIVE",
+                member.isActive() ? "active" : "inactive",
                 addressDto,
                 employmentDto,
                 auditDto,
@@ -59,9 +59,10 @@ public class MemberMapper {
         );
     }
 
-    private static LoanBriefDto toLoanBriefDto(Loan loan) {
-        return new LoanBriefDto(
+    private static MemberDto.LoanBriefDto toLoanBriefDto(Loan loan) {
+        return new MemberDto.LoanBriefDto(
                 loan.getId(),
+                loan.getDisplayId(),
                 loan.getLoanType(),
                 loan.getAmount(),
                 loan.getLoanPurpose(),

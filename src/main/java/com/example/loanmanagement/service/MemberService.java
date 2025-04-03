@@ -1,16 +1,20 @@
 package com.example.loanmanagement.service;
 
+import com.example.loanmanagement.controller.MemberController;
 import com.example.loanmanagement.dto.member.MemberSummaryDto;
 import com.example.loanmanagement.entity.Member;
 import com.example.loanmanagement.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -20,7 +24,8 @@ public class MemberService {
     
     private final MemberRepository memberRepository;
     private DisplayIdService displayIdService;
-    
+    private static final Logger log = LoggerFactory.getLogger(MemberService.class);
+
     @Transactional
     public Member createMember(Member member) {
         if (memberRepository.existsByEmail(member.getEmail())) {
@@ -33,10 +38,21 @@ public class MemberService {
         member.setDisplayId(displayIdService.getNextDisplayId("member"));
         return memberRepository.save(member);
     }
-    
+
     public Member getMember(UUID id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Member not found with id: " + id));
+        try {
+            Optional<Member> memberOpt = memberRepository.findById(id);
+            if (memberOpt.isEmpty()) {
+                log.warn("No member found for id: {}", id);
+                return null;
+            }
+            Member member = memberOpt.get();
+            System.out.println("SERVICE MEMBER: " + member);
+            return member;
+        } catch (Exception ex) {
+            log.error("Error in getMember", ex);
+            throw ex; // allow controller to log it too
+        }
     }
     
     public Page<Member> searchMembers(

@@ -26,24 +26,7 @@ public class MemberDto {
     private AuditDto audit;
     private List<LoanBriefDto> loans;
 
-    public MemberDto(UUID id,
-                     String displayId,
-                     String fullName,
-                     String email,
-                     String phoneNumber,
-                     LocalDate dateOfBirth,
-                     String gender,
-                     String nationalId,
-                     Integer creditScore,
-                     String memberNumber,
-                     String memberType,
-                     boolean documentsVerified,
-                     LocalDate joinedDate,
-                     String status,
-                     AddressDto address,
-                     EmploymentDto employment,
-                     AuditDto audit,
-                     List<LoanBriefDto> loans) {
+    public MemberDto(UUID id, String displayId, String fullName, String email, String phoneNumber, LocalDate dateOfBirth, String gender, String nationalId, Integer creditScore, String memberNumber, String memberType, boolean documentsVerified, LocalDate joinedDate, String status, AddressDto address, EmploymentDto employment, AuditDto audit, List<LoanBriefDto> loans) {
         this.id = id;
         this.displayId = displayId;
         this.fullName = fullName;
@@ -64,15 +47,27 @@ public class MemberDto {
         this.loans = loans;
     }
 
-    // Getters and setters omitted for brevity — include them if needed
+    public UUID getId() { return id; }
+    public String getDisplayId() { return displayId; }
+    public String getFullName() { return fullName; }
+    public String getEmail() { return email; }
+    public String getPhoneNumber() { return phoneNumber; }
+    public LocalDate getDateOfBirth() { return dateOfBirth; }
+    public String getGender() { return gender; }
+    public String getNationalId() { return nationalId; }
+    public Integer getCreditScore() { return creditScore; }
+    public String getMemberNumber() { return memberNumber; }
+    public String getMemberType() { return memberType; }
+    public boolean isDocumentsVerified() { return documentsVerified; }
+    public LocalDate getJoinedDate() { return joinedDate; }
+    public String getStatus() { return status; }
+    public AddressDto getAddress() { return address; }
+    public EmploymentDto getEmployment() { return employment; }
+    public AuditDto getAudit() { return audit; }
+    public List<LoanBriefDto> getLoans() { return loans; }
 
     public static class AddressDto {
-        private String street;
-        private String city;
-        private String region;
-        private String postalCode;
-        private String country;
-
+        private String street, city, region, postalCode, country;
         public AddressDto(String street, String city, String region, String postalCode, String country) {
             this.street = street;
             this.city = city;
@@ -80,51 +75,52 @@ public class MemberDto {
             this.postalCode = postalCode;
             this.country = country;
         }
-
-        // Getters and setters if needed
+        public String getStreet() { return street; }
+        public String getCity() { return city; }
+        public String getRegion() { return region; }
+        public String getPostalCode() { return postalCode; }
+        public String getCountry() { return country; }
     }
 
     public static class EmploymentDto {
-        private String employerName;
-        private String occupation;
-        private String incomeBracket;
-
+        private String employerName, occupation, incomeBracket;
         public EmploymentDto(String employerName, String occupation, String incomeBracket) {
             this.employerName = employerName;
             this.occupation = occupation;
             this.incomeBracket = incomeBracket;
         }
-
-        // Getters and setters if needed
+        public String getEmployerName() { return employerName; }
+        public String getOccupation() { return occupation; }
+        public String getIncomeBracket() { return incomeBracket; }
     }
 
     public static class AuditDto {
-        private LocalDateTime createdAt;
-        private String createdBy;
-        private LocalDateTime updatedAt;
-        private String lastModifiedBy;
-
+        private LocalDateTime createdAt, updatedAt;
+        private String createdBy, lastModifiedBy;
         public AuditDto(LocalDateTime createdAt, String createdBy, LocalDateTime updatedAt, String lastModifiedBy) {
             this.createdAt = createdAt;
             this.createdBy = createdBy;
             this.updatedAt = updatedAt;
             this.lastModifiedBy = lastModifiedBy;
         }
-
-        // Getters and setters if needed
+        public LocalDateTime getCreatedAt() { return createdAt; }
+        public String getCreatedBy() { return createdBy; }
+        public LocalDateTime getUpdatedAt() { return updatedAt; }
+        public String getLastModifiedBy() { return lastModifiedBy; }
     }
 
     public static class LoanBriefDto {
         private UUID id;
+        private String displayId;
         private String loanType;
         private BigDecimal amount;
         private String loanPurpose;
         private LocalDate startDate;
         private Integer term;
         private String status;
-
-        public LoanBriefDto(UUID id, String loanType, BigDecimal amount, String loanPurpose, LocalDate startDate, Integer term, String status) {
+        public LoanBriefDto(UUID id, String displayId, String loanType, BigDecimal amount, String loanPurpose, LocalDate startDate, Integer term, String status) {
             this.id = id;
+            this.displayId = displayId;
             this.loanType = loanType;
             this.amount = amount;
             this.loanPurpose = loanPurpose;
@@ -132,7 +128,13 @@ public class MemberDto {
             this.term = term;
             this.status = status;
         }
-
-        // Getters and setters if needed
+        public UUID getId() { return id; }
+        public String getDisplayId() { return displayId; }
+        public String getLoanType() { return loanType; }
+        public BigDecimal getAmount() { return amount; }
+        public String getLoanPurpose() { return loanPurpose; }
+        public LocalDate getStartDate() { return startDate; }
+        public Integer getTerm() { return term; }
+        public String getStatus() { return status; }
     }
 }

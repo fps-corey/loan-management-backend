@@ -3,6 +3,8 @@ package com.example.loanmanagement.entity;
 import com.example.loanmanagement.entity.enums.EducationLevel;
 import com.example.loanmanagement.entity.enums.MaritalStatus;
 import com.example.loanmanagement.entity.enums.ResidentialStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -129,9 +131,11 @@ public class Member extends BaseEntity {
     private String referralSource;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference // For safe serialization
     private Set<Loan> loans = new HashSet<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Set<Document> documents = new HashSet<>();
 
     @Column(nullable = false)
