@@ -1,4 +1,4 @@
-package com.example.loanmanagement.models;
+package com.example.loanmanagement.dto.loans;
 
 import com.example.loanmanagement.entity.Loan;
 import com.example.loanmanagement.entity.enums.LoanStatus;

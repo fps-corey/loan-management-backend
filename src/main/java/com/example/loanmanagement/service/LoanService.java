@@ -1,10 +1,11 @@
 package com.example.loanmanagement.service;
 
+import com.example.loanmanagement.dto.LoanSummaryDto;
+import com.example.loanmanagement.dto.loans.LoanSummaryView;
 import com.example.loanmanagement.entity.Loan;
 import com.example.loanmanagement.entity.Member;
 import com.example.loanmanagement.entity.enums.LoanStatus;
 import com.example.loanmanagement.exception.NotFoundException;
-import com.example.loanmanagement.models.LoanDto;
 import com.example.loanmanagement.repository.LoanRepository;
 import com.example.loanmanagement.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -14,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -34,7 +34,7 @@ public class LoanService {
                 .orElseThrow(() -> new EntityNotFoundException("Member not found with id: " + loan.getMember().getId()));
         
         // Set initial status
-        loan.setStatus(LoanStatus.PENDING);
+        loan.setStatus(LoanStatus.REQUESTED);
         loan.setStartDate(LocalDate.now());
         loan.setActive(true);
         
@@ -99,7 +99,11 @@ public class LoanService {
     @Transactional
     public Loan approveLoan(UUID id) {
         Loan loan = getLoan(id);
-        loan.setStatus(LoanStatus.APPROVED);
+        if (loan.getApprovals().size() > 1) {
+            loan.setStatus(LoanStatus.PENDING_COMMITTEE);
+        } else {
+            loan.setStatus(LoanStatus.PENDING_APPROVAL);
+        }
         return loanRepository.save(loan);
     }
     
@@ -120,14 +124,14 @@ public class LoanService {
     @Transactional
     public Loan closeLoan(UUID id) {
         Loan loan = getLoan(id);
-        loan.setStatus(LoanStatus.CLOSED);
+        loan.setStatus(LoanStatus.COMPLETE);
         return loanRepository.save(loan);
     }
     
     @Transactional
     public Loan defaultLoan(UUID id) {
         Loan loan = getLoan(id);
-        loan.setStatus(LoanStatus.DEFAULTED);
+        loan.setStatus(LoanStatus.IN_ARREARS);
         return loanRepository.save(loan);
     }
     
@@ -138,4 +142,8 @@ public class LoanService {
     public List<Loan> findActiveLoansByPaymentAmount(Double amount) {
         return loanRepository.findActiveLoansByPaymentAmount(amount);
     }
-} 
+
+    public List<LoanSummaryView> findAllLoanSummaries() {
+        return loanRepository.findAllLoanSummaries();
+    }
+}

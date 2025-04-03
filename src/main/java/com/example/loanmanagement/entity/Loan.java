@@ -15,41 +15,44 @@ import java.util.Set;
 @Getter
 @Setter
 public class Loan extends BaseEntity {
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
-    
+
     @Column(nullable = false)
     private String referenceNumber;
-    
+
     @Column(nullable = false)
     private BigDecimal amount;
-    
+
     @Column(nullable = false)
     private BigDecimal interestRate;
-    
+
     @Column(nullable = false)
     private Integer termInMonths;
-    
+
     @Column(nullable = false)
     private BigDecimal monthlyPayment;
-    
+
     @Column(nullable = false)
     private LocalDate startDate;
-    
+
     private LocalDate endDate;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LoanStatus status;
-    
+
     @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Document> documents = new HashSet<>();
-    
+
     @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Payment> payments = new HashSet<>();
-    
+
+    @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<LoanApproval> approvals = new HashSet<>();
+
     @Column(nullable = false)
     private boolean active = true;
-} 
+}

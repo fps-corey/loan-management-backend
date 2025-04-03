@@ -1,10 +1,15 @@
 package com.example.loanmanagement.entity.enums;
 
 public enum LoanStatus {
-    PENDING,
-    APPROVED,
-    REJECTED,
+    REQUESTED,
+    PENDING_DOCS,
+    PENDING_INTERVIEW,
+    PENDING_COMMITTEE,
+    PENDING_APPROVAL,
+    AWAITING_PAYOUT,
+    PAYOUT_CONFIRMED,
+    IN_ARREARS,
     ACTIVE,
-    CLOSED,
-    DEFAULTED
-} 
+    COMPLETE,
+    REJECTED
+}

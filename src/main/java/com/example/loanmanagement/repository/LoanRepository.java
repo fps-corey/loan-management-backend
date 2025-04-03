@@ -1,5 +1,6 @@
 package com.example.loanmanagement.repository;
 
+import com.example.loanmanagement.dto.loans.LoanSummaryView;
 import com.example.loanmanagement.entity.Loan;
 import com.example.loanmanagement.entity.enums.LoanStatus;
 import org.springframework.data.domain.Page;
@@ -38,4 +39,15 @@ public interface LoanRepository extends JpaRepository<Loan, UUID> {
     
     @Query("SELECT l FROM Loan l WHERE l.monthlyPayment = :amount AND l.status = 'ACTIVE'")
     List<Loan> findActiveLoansByPaymentAmount(@Param("amount") Double amount);
+
+    @Query("""
+    SELECT 
+        l.id AS id,
+        l.referenceNumber AS referenceNumber,
+        l.status AS status,
+        CONCAT(m.firstName, ' ', m.lastName) AS borrower
+    FROM Loan l
+    JOIN l.member m
+    """)
+    List<LoanSummaryView> findAllLoanSummaries();
 } 
