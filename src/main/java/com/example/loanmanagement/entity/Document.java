@@ -11,7 +11,10 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class Document extends BaseEntity {
-    
+
+    @Column(name = "display_id", unique = true, nullable = false)
+    private String displayId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;

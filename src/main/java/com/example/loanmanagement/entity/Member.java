@@ -16,7 +16,10 @@ import java.util.Set;
 @Getter
 @Setter
 public class Member extends BaseEntity {
-    
+
+    @Column(name = "display_id", unique = true, nullable = false)
+    private String displayId;
+
     @Column(nullable = false)
     private String firstName;
     

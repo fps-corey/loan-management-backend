@@ -20,6 +20,9 @@ public class Loan extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @Column(name = "display_id", unique = true, nullable = false)
+    private String displayId;
+
     @Column(nullable = false)
     private String referenceNumber;
 

@@ -10,6 +10,7 @@ import java.util.UUID;
 public class LoanDto {
 
     private UUID id;
+    private String displayId;
     private UUID memberId;
     private String borrower;
 
@@ -36,6 +37,7 @@ public class LoanDto {
     public static LoanDto from(Loan loan) {
         LoanDto dto = new LoanDto();
         dto.setId(loan.getId());
+        dto.setDisplayId(loan.getDisplayId());
         dto.setMemberId(loan.getMember().getId());
         dto.setBorrower(loan.getMember().getFirstName() + " " + loan.getMember().getLastName());
 
@@ -66,6 +68,14 @@ public class LoanDto {
 
     public UUID getId() {
         return id;
+    }
+
+    public String getDisplayId() {
+        return displayId;
+    }
+
+    public void setDisplayId(String displayId) {
+        this.displayId = displayId;
     }
 
     public void setId(UUID id) {

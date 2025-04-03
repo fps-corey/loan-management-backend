@@ -26,13 +26,15 @@ public class LoanService {
     
     private final LoanRepository loanRepository;
     private final MemberRepository memberRepository;
-    
+    private final DisplayIdService displayIdService;
+
     @Transactional
     public Loan createLoan(Loan loan) {
         // Verify member exists
         Member member = memberRepository.findById(loan.getMember().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Member not found with id: " + loan.getMember().getId()));
-        
+        loan.setMember(member);
+        loan.setDisplayId(displayIdService.getNextDisplayId("loan"));
         // Set initial status
         loan.setStatus(LoanStatus.REQUESTED);
         loan.setStartDate(LocalDate.now());
