@@ -6,5 +6,7 @@ public interface LoanSummaryView {
     UUID getId();
     String getReferenceNumber();
     String getStatus();
+    String getTotalAmount();
+    String getTermInMonths();
     String getBorrower(); // custom field
 }

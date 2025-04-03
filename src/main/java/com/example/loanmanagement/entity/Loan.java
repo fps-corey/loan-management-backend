@@ -44,6 +44,36 @@ public class Loan extends BaseEntity {
     @Column(nullable = false)
     private LoanStatus status;
 
+    @Column(nullable = false)
+    private boolean active = true;
+
+    @Column
+    private BigDecimal existingAmount;
+
+    @Column
+    private BigDecimal fees;
+
+    @Column
+    private BigDecimal totalLoanAmount;
+
+    @Column
+    private String issueAccount;
+
+    @Column
+    private Integer numPayments;
+
+    @Column
+    private String loanType;
+
+    @Column
+    private String loanPurpose;
+
+    @Column
+    private String marketingCampaign;
+
+    @Column
+    private String additionalServices;
+
     @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Document> documents = new HashSet<>();
 
@@ -52,7 +82,4 @@ public class Loan extends BaseEntity {
 
     @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<LoanApproval> approvals = new HashSet<>();
-
-    @Column(nullable = false)
-    private boolean active = true;
 }

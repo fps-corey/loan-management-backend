@@ -41,10 +41,12 @@ public interface LoanRepository extends JpaRepository<Loan, UUID> {
     List<Loan> findActiveLoansByPaymentAmount(@Param("amount") Double amount);
 
     @Query("""
-    SELECT 
+    SELECT
         l.id AS id,
         l.referenceNumber AS referenceNumber,
         l.status AS status,
+        l.amount AS totalAmount,
+        l.termInMonths AS termInMonths,
         CONCAT(m.firstName, ' ', m.lastName) AS borrower
     FROM Loan l
     JOIN l.member m
