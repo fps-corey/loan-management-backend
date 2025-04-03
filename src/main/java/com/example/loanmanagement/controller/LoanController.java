@@ -2,6 +2,7 @@ package com.example.loanmanagement.controller;
 
 import com.example.loanmanagement.entity.Loan;
 import com.example.loanmanagement.entity.enums.LoanStatus;
+import com.example.loanmanagement.models.LoanDto;
 import com.example.loanmanagement.service.LoanService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +28,9 @@ public class LoanController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Loan> getLoan(@PathVariable UUID id) {
-        return ResponseEntity.ok(loanService.getLoan(id));
+    public ResponseEntity<LoanDto> getLoan(@PathVariable UUID id) {
+        Loan loan = loanService.getLoan(id);
+        return ResponseEntity.ok(LoanDto.from(loan));
     }
 
     @GetMapping("/member/{memberId}")
