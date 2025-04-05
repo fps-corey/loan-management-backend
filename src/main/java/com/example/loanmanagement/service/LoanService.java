@@ -29,6 +29,7 @@ public class LoanService {
     private final LoanRepository loanRepository;
     private final MemberRepository memberRepository;
     private final DisplayIdService displayIdService;
+    private final LoanStatusEngine loanStatusEngine;
     private static final Logger log = LoggerFactory.getLogger(LoanService.class);
 
 
@@ -47,7 +48,8 @@ public class LoanService {
         // Calculate end date based on term
         loan.setEndDate(loan.getStartDate().plusMonths(loan.getTermInMonths()));
         
-        return loanRepository.save(loan);
+        loanRepository.save(loan);
+        return loan;
     }
     
     public Loan getLoan(UUID id) {
@@ -116,8 +118,12 @@ public class LoanService {
     @Transactional
     public Loan rejectLoan(UUID id) {
         Loan loan = getLoan(id);
-        loan.setStatus(LoanStatus.REJECTED);
-        return loanRepository.save(loan);
+        return loanStatusEngine.transition(
+                loan.getId(),
+                LoanStatus.REJECTED,
+                false,                          // override? no
+                "Loan rejected because of..." //Take as input
+        );
     }
     
     @Transactional

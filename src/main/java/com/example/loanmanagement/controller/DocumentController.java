@@ -7,6 +7,7 @@ import com.example.loanmanagement.entity.Document;
 import com.example.loanmanagement.entity.enums.DocumentType;
 import com.example.loanmanagement.repository.DocumentRepository;
 import com.example.loanmanagement.service.DocumentService;
+import com.example.loanmanagement.service.LoanWorkflowService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
@@ -30,10 +31,11 @@ public class DocumentController {
     
     private final DocumentService documentService;
     private final DocumentRepository documentRepository;
+    private final LoanWorkflowService loanWorkflowService;
 
     @PostMapping("/base64")
     public ResponseEntity<DocumentDto> uploadBase64Document(@RequestBody UploadDocumentRequest request) throws IOException {
-        Document saved = documentService.uploadBase64Document(request);
+        Document saved = loanWorkflowService.uploadDocument(request);
         return ResponseEntity.ok(new DocumentDto(saved));
     }
 
