@@ -1,5 +1,6 @@
 package com.example.loanmanagement.service;
 
+import com.example.loanmanagement.dto.documents.UploadDocumentRequest;
 import com.example.loanmanagement.entity.Document;
 import com.example.loanmanagement.entity.Loan;
 import com.example.loanmanagement.entity.Member;
@@ -13,13 +14,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,86 +29,90 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class DocumentService {
-    
+
     private final DocumentRepository documentRepository;
     private final MemberRepository memberRepository;
     private final LoanRepository loanRepository;
-    
+
     private static final String UPLOAD_DIR = "/app/uploads/documents";
-    
+
     @Transactional
-    public Document uploadDocument(
-            MultipartFile file,
-            UUID memberId,
-            UUID loanId,
-            DocumentType type,
-            String description
-    ) throws IOException {
-        // Verify member exists
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new EntityNotFoundException("Member not found with id: " + memberId));
-        
-        // Verify loan exists if provided
+    public Document uploadBase64Document(UploadDocumentRequest request) throws IOException {
+        Member member = memberRepository.findById(request.getMember())
+                .orElseThrow(() -> new EntityNotFoundException("Member not found with id: " + request.getMember()));
+
         Loan loan = null;
-        if (loanId != null) {
-            loan = loanRepository.findById(loanId)
-                    .orElseThrow(() -> new EntityNotFoundException("Loan not found with id: " + loanId));
+        if (request.getLoan() != null) {
+            loan = loanRepository.findById(request.getLoan())
+                    .orElseThrow(() -> new EntityNotFoundException("Loan not found with id: " + request.getLoan()));
         }
-        
-        // Create upload directory if it doesn't exist
+
         Path uploadPath = Paths.get(UPLOAD_DIR);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
-        
-        // Generate unique filename
-        String originalFilename = file.getOriginalFilename();
-        String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
-        
-        // Save file
+
+        String fileExtension = ".bin";
+        if (request.getName() != null && request.getName().contains(".")) {
+            fileExtension = request.getName().substring(request.getName().lastIndexOf("."));
+        }
+
+        String uniqueFilename = UUID.randomUUID() + fileExtension;
         Path filePath = uploadPath.resolve(uniqueFilename);
-        Files.copy(file.getInputStream(), filePath);
-        
-        // Get latest version number
-        Optional<Integer> latestVersion = documentRepository.findLatestVersionByMemberAndType(memberId, type);
+
+        // Decode base64
+        String base64Data = request.getContentBase64();
+        if (base64Data.contains(",")) {
+            base64Data = base64Data.substring(base64Data.indexOf(",") + 1);
+        }
+        byte[] decodedBytes = Base64.getDecoder().decode(base64Data);
+
+        Files.write(filePath, decodedBytes, StandardOpenOption.CREATE);
+
+        DocumentType type = DocumentType.valueOf(request.getType());
+        Optional<Integer> latestVersion = documentRepository.findLatestVersionByMemberAndType(request.getMember(), type);
         int version = latestVersion.map(v -> v + 1).orElse(1);
-        
-        // Create document entity
+
         Document document = new Document();
+        document.setDisplayId("DOC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         document.setMember(member);
         document.setLoan(loan);
-        document.setFileName(originalFilename);
-        document.setContentType(file.getContentType());
-        document.setFileSize(file.getSize());
+        document.setFileName(request.getName());
+        document.setContentType(request.getMimeType());
+        document.setFileSize((long) decodedBytes.length);
         document.setFilePath(filePath.toString());
         document.setDocumentType(type);
-        document.setVersionNumber(version);
-        document.setDescription(description);
+        document.setVersion((long) version);
+        document.setDescription(request.getDescription());
+        document.setSigned(false);
+        document.setVerified(false);
         document.setActive(true);
-        
+        document.setCreatedAt(LocalDateTime.now());
+        document.setCreatedBy("ADMIN"); //TODO get username or simialr from token
+        document.setLastModifiedBy("ADMIN");
+        document.setDeleted(false);
         return documentRepository.save(document);
     }
-    
+
     public Document getDocument(UUID id) {
         return documentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Document not found with id: " + id));
     }
-    
+
     public byte[] downloadDocument(UUID id) throws IOException {
         Document document = getDocument(id);
         Path filePath = Paths.get(document.getFilePath());
         return Files.readAllBytes(filePath);
     }
-    
+
     public Page<Document> getMemberDocuments(UUID memberId, Pageable pageable) {
         return documentRepository.findByMemberId(memberId, pageable);
     }
-    
+
     public Page<Document> getLoanDocuments(UUID loanId, Pageable pageable) {
         return documentRepository.findByLoanId(loanId, pageable);
     }
-    
+
     public Page<Document> searchDocuments(
             UUID memberId,
             UUID loanId,
@@ -118,27 +123,23 @@ public class DocumentService {
     ) {
         return documentRepository.findBySearchCriteria(memberId, loanId, type, fileName, active, pageable);
     }
-    
+
     @Transactional
     public Document updateDocument(UUID id, String description) {
         Document document = getDocument(id);
         document.setDescription(description);
         return documentRepository.save(document);
     }
-    
+
     @Transactional
     public void deleteDocument(UUID id) throws IOException {
         Document document = getDocument(id);
-        
-        // Delete file from filesystem
         Path filePath = Paths.get(document.getFilePath());
         Files.deleteIfExists(filePath);
-        
-        // Soft delete document
         document.setActive(false);
         documentRepository.save(document);
     }
-    
+
     @Transactional
     public Document signDocument(UUID id, String signedBy, String signatureHash) {
         Document document = getDocument(id);
@@ -148,12 +149,13 @@ public class DocumentService {
         document.setVerified(true);
         return documentRepository.save(document);
     }
-    
+
     public List<Document> getLatestVersionsByMemberAndType(UUID memberId, DocumentType type) {
         return documentRepository.findLatestVersionsByMemberAndType(memberId, type);
     }
-    
+
     public List<Document> getSignedAgreementsByLoan(UUID loanId) {
         return documentRepository.findSignedAgreementsByLoan(loanId);
     }
-} 
+
+}

@@ -43,6 +43,7 @@ public interface LoanRepository extends JpaRepository<Loan, UUID> {
     @Query("""
     SELECT
         l.id AS id,
+        l.displayId as displayId,
         l.referenceNumber AS referenceNumber,
         l.status AS status,
         l.amount AS totalAmount,
@@ -52,4 +53,35 @@ public interface LoanRepository extends JpaRepository<Loan, UUID> {
     JOIN l.member m
     """)
     List<LoanSummaryView> findAllLoanSummaries();
+
+    @Query("""
+    SELECT
+        l.id AS id,
+        l.displayId as displayId,
+        l.referenceNumber AS referenceNumber,
+        l.status AS status,
+        l.amount AS totalAmount,
+        l.termInMonths AS termInMonths,
+        CONCAT(m.firstName, ' ', m.lastName) AS borrower
+    FROM Loan l
+    JOIN l.member m
+    WHERE l.id = :id
+""")
+    Optional<LoanSummaryView> findLoanSummaryById(@Param("id") UUID id);
+
+    @Query("""
+    SELECT
+        l.id AS id,
+        l.displayId as displayId,
+        l.referenceNumber AS referenceNumber,
+        l.status AS status,
+        l.amount AS totalAmount,
+        l.termInMonths AS termInMonths,
+        CONCAT(m.firstName, ' ', m.lastName) AS borrower
+    FROM Loan l
+    JOIN l.member m
+    WHERE l.id IN :ids
+""")
+    List<LoanSummaryView> findLoanSummariesByIds(@Param("ids") List<UUID> ids);
+
 } 

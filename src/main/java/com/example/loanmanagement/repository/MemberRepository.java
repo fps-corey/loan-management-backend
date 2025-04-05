@@ -33,20 +33,40 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
             Pageable pageable
     );
 
-    @Query("""
+    @Query(value = """
     SELECT 
       m.id AS id,
-      m.displayId AS displayId,
-      CONCAT(m.firstName, ' ', m.lastName) AS fullName,
+      m.display_id AS displayId,
+      CONCAT(m.first_name, ' ', m.last_name) AS fullName,
       m.email AS email,
-      m.phoneNumber AS phoneNumber,
-      SIZE(m.loans) AS loanCount,
+      m.phone_number AS phoneNumber,
+      ARRAY_AGG(l.id) AS loanIds,
+      COUNT(l.id) AS loanCount,
       m.active AS active
-    FROM Member m
-    """)
+    FROM members m
+    LEFT JOIN loans l ON m.id = l.member_id
+    GROUP BY m.id, m.display_id, m.first_name, m.last_name, m.email, m.phone_number, m.active
+""", nativeQuery = true)
     List<MemberSummaryDto> findAllSummaries();
 
-    
+
+    @Query(value = """
+    SELECT 
+      m.id AS id,
+      m.display_id AS displayId,
+      CONCAT(m.first_name, ' ', m.last_name) AS fullName,
+      m.email AS email,
+      m.phone_number AS phoneNumber,
+      ARRAY_AGG(l.id) AS loanIds,
+      COUNT(l.id) AS loanCount,
+      m.active AS active
+    FROM members m
+    LEFT JOIN loans l ON m.id = l.member_id
+    WHERE m.id = :id
+    GROUP BY m.id, m.display_id, m.first_name, m.last_name, m.email, m.phone_number, m.active
+""", nativeQuery = true)
+    Optional<MemberSummaryDto> findSummaryById(@Param("id") UUID id);
+
     boolean existsByEmail(String email);
     
     boolean existsByPhoneNumber(String phoneNumber);

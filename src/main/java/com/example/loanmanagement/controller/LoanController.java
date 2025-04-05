@@ -1,6 +1,5 @@
 package com.example.loanmanagement.controller;
 
-import com.example.loanmanagement.dto.LoanSummaryDto;
 import com.example.loanmanagement.dto.loans.LoanDto;
 import com.example.loanmanagement.dto.loans.LoanSummaryView;
 import com.example.loanmanagement.entity.Loan;
@@ -36,10 +35,22 @@ public class LoanController {
     }
 
 
+    @GetMapping("/summary/{id}")
+    public ResponseEntity<LoanSummaryView> getLoanSummaryById(@PathVariable UUID id) {
+        return ResponseEntity.ok(loanService.findLoanSummaryById(id));
+    }
+
     @GetMapping("/summary")
     public ResponseEntity<List<LoanSummaryView>> getLoanSummaries() {
         return ResponseEntity.ok(loanService.findAllLoanSummaries());
     }
+
+
+    @PostMapping("/summary")
+    public ResponseEntity<List<LoanSummaryView>> getLoanSummariesByIds(@RequestBody List<UUID> ids) {
+        return ResponseEntity.ok(loanService.findLoanSummaryById(ids));
+    }
+
 
     @GetMapping("/member/{memberId}")
     public ResponseEntity<Page<Loan>> getMemberLoans(

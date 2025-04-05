@@ -1,6 +1,5 @@
 package com.example.loanmanagement.service;
 
-import com.example.loanmanagement.dto.LoanSummaryDto;
 import com.example.loanmanagement.dto.loans.LoanSummaryView;
 import com.example.loanmanagement.entity.Loan;
 import com.example.loanmanagement.entity.Member;
@@ -10,6 +9,8 @@ import com.example.loanmanagement.repository.LoanRepository;
 import com.example.loanmanagement.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -27,6 +29,8 @@ public class LoanService {
     private final LoanRepository loanRepository;
     private final MemberRepository memberRepository;
     private final DisplayIdService displayIdService;
+    private static final Logger log = LoggerFactory.getLogger(LoanService.class);
+
 
     @Transactional
     public Loan createLoan(Loan loan) {
@@ -147,5 +151,35 @@ public class LoanService {
 
     public List<LoanSummaryView> findAllLoanSummaries() {
         return loanRepository.findAllLoanSummaries();
+    }
+
+    public LoanSummaryView findLoanSummaryById(UUID id) {
+        try {
+            Optional<LoanSummaryView> memberOpt = loanRepository.findLoanSummaryById(id);
+            if (memberOpt.isEmpty()) {
+                log.warn("No member found for id: {}", id);
+                return null;
+            }
+            LoanSummaryView loan = memberOpt.get();
+            System.out.println("SERVICE MEMBER: " + loan);
+            return loan;
+        } catch (Exception ex) {
+            log.error("Error in getMember", ex);
+            throw ex; // allow controller to log it too
+        }
+    }
+
+    public List<LoanSummaryView> findLoanSummaryById(List<UUID> ids) {
+        try {
+            List<LoanSummaryView> loanSummariesByIds = loanRepository.findLoanSummariesByIds(ids);
+            if (loanSummariesByIds.isEmpty()) {
+                log.warn("No member found for id: {}", ids);
+                return null;
+            }
+            return loanSummariesByIds;
+        } catch (Exception ex) {
+            log.error("Error in getMember", ex);
+            throw ex; // allow controller to log it too
+        }
     }
 }

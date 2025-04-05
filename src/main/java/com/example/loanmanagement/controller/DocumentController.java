@@ -1,7 +1,11 @@
 package com.example.loanmanagement.controller;
 
+import com.example.loanmanagement.dto.documents.DocumentDto;
+import com.example.loanmanagement.dto.documents.DocumentView;
+import com.example.loanmanagement.dto.documents.UploadDocumentRequest;
 import com.example.loanmanagement.entity.Document;
 import com.example.loanmanagement.entity.enums.DocumentType;
+import com.example.loanmanagement.repository.DocumentRepository;
 import com.example.loanmanagement.service.DocumentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,23 +28,33 @@ import java.util.UUID;
 public class DocumentController {
     
     private final DocumentService documentService;
-    
-    @PostMapping("/upload")
-    public ResponseEntity<Document> uploadDocument(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("memberId") UUID memberId,
-            @RequestParam(required = false) UUID loanId,
-            @RequestParam("type") DocumentType type,
-            @RequestParam(required = false) String description
-    ) throws Exception {
-        return ResponseEntity.ok(documentService.uploadDocument(file, memberId, loanId, type, description));
+    private final DocumentRepository documentRepository;
+
+    @PostMapping("/base64")
+    public ResponseEntity<DocumentDto> uploadBase64Document(@RequestBody UploadDocumentRequest request) throws IOException {
+        Document saved = documentService.uploadBase64Document(request);
+        return ResponseEntity.ok(new DocumentDto(saved));
     }
-    
+
+    @GetMapping("/summary")
+    public ResponseEntity<?> getDocumentSummary() {
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/member/summary/{id}")
+    public ResponseEntity<List<DocumentView>> getDocumentSummaryByMemberId(@PathVariable("id") UUID id) {
+        return ResponseEntity.ok(documentRepository.findAllViewsByMemberId(id));
+    }
+
+    @GetMapping("/loans/summary/{id}")
+    public ResponseEntity<List<DocumentView>> getDocumentSummaryByLoanId(@PathVariable("id") UUID id) {
+        return ResponseEntity.ok(documentRepository.findAllViewsByLoanId(id));
+    }
     @GetMapping("/{id}")
-    public ResponseEntity<Document> getDocument(@PathVariable UUID id) {
-        return ResponseEntity.ok(documentService.getDocument(id));
+    public ResponseEntity<DocumentDto> getDocument(@PathVariable UUID id) {
+        return ResponseEntity.ok(new DocumentDto(documentService.getDocument(id)));
     }
-    
+
     @GetMapping("/{id}/download")
     public ResponseEntity<ByteArrayResource> downloadDocument(@PathVariable UUID id) throws Exception {
         Document document = documentService.getDocument(id);

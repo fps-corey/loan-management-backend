@@ -4,6 +4,7 @@ import com.example.loanmanagement.entity.enums.DocumentType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -41,10 +42,7 @@ public class Document extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "document_type", nullable = false)
     private DocumentType documentType;
-    
-    @Column(name = "version_number", nullable = false)
-    private Integer versionNumber;
-    
+
     @Column(nullable = false)
     private Boolean signed = false;
     

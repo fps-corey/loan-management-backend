@@ -105,4 +105,20 @@ public class MemberService {
     public List<MemberSummaryDto> getMemberSummary() {
         return memberRepository.findAllSummaries();
     }
+
+    public MemberSummaryDto getMemberSummaryById(UUID id) {
+        try {
+            Optional<MemberSummaryDto> memberOpt = memberRepository.findSummaryById(id);
+            if (memberOpt.isEmpty()) {
+                log.warn("No member found for id: {}", id);
+                return null;
+            }
+            MemberSummaryDto member = memberOpt.get();
+            System.out.println("SERVICE MEMBER: " + member);
+            return member;
+        } catch (Exception ex) {
+            log.error("Error in getMember", ex);
+            throw ex; // allow controller to log it too
+        }
+    }
 }

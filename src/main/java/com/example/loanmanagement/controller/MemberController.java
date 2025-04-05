@@ -40,6 +40,11 @@ public class MemberController {
         return ResponseEntity.ok(memberService.getMemberSummary());
     }
 
+    @GetMapping("/summary/{id}")
+    public ResponseEntity<MemberSummaryDto> getMemberSummaryId(@PathVariable UUID id) {
+        return ResponseEntity.ok(memberService.getMemberSummaryById(id));
+    }
+
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MemberDto> getMember(@PathVariable UUID id) {
         try {

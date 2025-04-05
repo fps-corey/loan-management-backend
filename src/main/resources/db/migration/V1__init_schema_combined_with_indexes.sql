@@ -97,78 +97,30 @@ CREATE TABLE loans (
                        additional_services TEXT,
                        active BOOLEAN NOT NULL
 );
+-- Create loan_approvals table
+CREATE TABLE IF NOT EXISTS loan_approvals (
+                                              id UUID PRIMARY KEY,
+                                              loan_id UUID NOT NULL REFERENCES loans(id),
+                                              approver VARCHAR(255) NOT NULL,
+                                              date DATE NOT NULL,
+                                              decision VARCHAR(50) NOT NULL,
+                                              notes TEXT,
 
--- DOCUMENTS
-CREATE TABLE documents (
-                           id UUID PRIMARY KEY,
-                           display_id VARCHAR(20) NOT NULL,
-                           created_at TIMESTAMP NOT NULL,
-                           updated_at TIMESTAMP NOT NULL,
-                           created_by VARCHAR(255) NOT NULL,
-                           last_modified_by VARCHAR(255) NOT NULL,
-                           version BIGINT,
-                           deleted BOOLEAN NOT NULL,
-                           member_id UUID NOT NULL REFERENCES members(id),
-                           loan_id UUID REFERENCES loans(id),
-                           file_name VARCHAR(255) NOT NULL,
-                           content_type VARCHAR(100) NOT NULL,
-                           file_size BIGINT NOT NULL,
-                           file_path TEXT NOT NULL,
-                           description TEXT,
-                           document_type VARCHAR(50) NOT NULL,
-                           version_number INT NOT NULL,
-                           signed BOOLEAN NOT NULL,
-                           signed_by VARCHAR(255),
-                           signed_at TIMESTAMP,
-                           signature_hash TEXT,
-                           active BOOLEAN NOT NULL,
-                           verified BOOLEAN NOT NULL
+    -- BaseEntity fields
+                                              version BIGINT NOT NULL DEFAULT 0,
+                                              deleted BOOLEAN NOT NULL DEFAULT FALSE,
+                                              created_at TIMESTAMP NOT NULL DEFAULT now(),
+                                              updated_at TIMESTAMP NOT NULL DEFAULT now(),
+                                              created_by VARCHAR(100) NOT NULL DEFAULT 'system',
+                                              last_modified_by VARCHAR(100) NOT NULL DEFAULT 'system'
 );
 
--- PAYMENTS
-CREATE TABLE payments (
-                          id UUID PRIMARY KEY,
-                          created_at TIMESTAMP NOT NULL,
-                          updated_at TIMESTAMP NOT NULL,
-                          created_by VARCHAR(255) NOT NULL,
-                          last_modified_by VARCHAR(255) NOT NULL,
-                          version BIGINT,
-                          deleted BOOLEAN NOT NULL,
-                          loan_id UUID NOT NULL REFERENCES loans(id),
-                          amount NUMERIC(15,2) NOT NULL,
-                          payment_date DATE NOT NULL,
-                          payment_method VARCHAR(50) NOT NULL,
-                          reference_number VARCHAR(100),
-                          status VARCHAR(50) NOT NULL,
-                          notes TEXT,
-                          active BOOLEAN NOT NULL
-);
-
--- LOAN APPROVALS
-CREATE TABLE loan_approvals (
-                                id UUID PRIMARY KEY,
-                                created_at TIMESTAMP NOT NULL,
-                                updated_at TIMESTAMP NOT NULL,
-                                created_by VARCHAR(255) NOT NULL,
-                                last_modified_by VARCHAR(255) NOT NULL,
-                                version BIGINT,
-                                deleted BOOLEAN NOT NULL,
-                                loan_id UUID NOT NULL REFERENCES loans(id) ON DELETE CASCADE,
-                                approver VARCHAR(255) NOT NULL,
-                                date DATE NOT NULL,
-                                decision VARCHAR(100) NOT NULL,
-                                notes TEXT,
-                                active BOOLEAN NOT NULL
-);
-
--- INDEXES
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_loan_approvals_loan_id ON loan_approvals(loan_id);
+CREATE INDEX IF NOT EXISTS idx_loan_approvals_decision ON loan_approvals(decision);
 CREATE INDEX idx_member_email ON members(email);
 CREATE INDEX idx_member_phone ON members(phone_number);
 CREATE INDEX idx_loan_reference_number ON loans(reference_number);
-CREATE INDEX idx_payment_loan_id ON payments(loan_id);
-CREATE INDEX idx_document_member_id ON documents(member_id);
-CREATE INDEX idx_document_loan_id ON documents(loan_id);
-CREATE INDEX idx_loan_approvals_loan_id ON loan_approvals(loan_id);
 
 
 -- SEED DATA
