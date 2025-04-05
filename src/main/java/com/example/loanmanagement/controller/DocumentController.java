@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -37,8 +38,11 @@ public class DocumentController {
     }
 
     @GetMapping("/summary")
-    public ResponseEntity<?> getDocumentSummary() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<DocumentView>> getDocumentSummary() {
+        List<DocumentView> top20Docs =
+                documentRepository.findAllViews(PageRequest.of(0, 20)).getContent();
+
+        return ResponseEntity.ok(top20Docs);
     }
 
     @GetMapping("/member/summary/{id}")
@@ -59,13 +63,13 @@ public class DocumentController {
     public ResponseEntity<ByteArrayResource> downloadDocument(@PathVariable UUID id) throws Exception {
         Document document = documentService.getDocument(id);
         byte[] data = documentService.downloadDocument(id);
-        
+
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(document.getContentType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + document.getFileName() + "\"")
                 .body(new ByteArrayResource(data));
     }
-    
+
     @GetMapping("/member/{memberId}")
     public ResponseEntity<Page<Document>> getMemberDocuments(
             @PathVariable UUID memberId,

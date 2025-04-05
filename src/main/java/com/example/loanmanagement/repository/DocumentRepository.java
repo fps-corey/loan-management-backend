@@ -87,4 +87,23 @@ public interface DocumentRepository extends JpaRepository<Document, UUID> {
 """)
     List<DocumentView> findAllViewsByLoanId(@Param("loanId") UUID loanId);
 
+
+    @Query("""
+    SELECT 
+        d.id AS id,
+        d.displayId AS displayId,
+        d.fileName AS name,
+        d.documentType AS type,
+        m.displayId AS member,
+        l.displayId AS loan,
+        d.createdAt AS uploaded,
+        CONCAT('v', d.version) AS version,
+        NOT d.signed AS requiresSignature,
+        d.contentType AS mimeType
+    FROM Document d
+    JOIN d.member m
+    LEFT JOIN d.loan l
+""")
+    Page<DocumentView> findAllViews(Pageable pageable);
+
 } 

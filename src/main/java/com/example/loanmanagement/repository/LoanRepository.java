@@ -60,6 +60,7 @@ public interface LoanRepository extends JpaRepository<Loan, UUID> {
         l.displayId as displayId,
         l.referenceNumber AS referenceNumber,
         l.status AS status,
+        l.member.id as memberId,
         l.amount AS totalAmount,
         l.termInMonths AS termInMonths,
         CONCAT(m.firstName, ' ', m.lastName) AS borrower
@@ -75,6 +76,7 @@ public interface LoanRepository extends JpaRepository<Loan, UUID> {
         l.displayId as displayId,
         l.referenceNumber AS referenceNumber,
         l.status AS status,
+        l.member.id as memberId,
         l.amount AS totalAmount,
         l.termInMonths AS termInMonths,
         CONCAT(m.firstName, ' ', m.lastName) AS borrower
